@@ -46,6 +46,7 @@
 ```
 
 * 5.2.2  转换方法:
+
     * toSting : 返回object 的字符串表示
     * valueof : 返回Object本身(特例: Date 返回与1970.1.1 的时间差)
 
@@ -85,10 +86,107 @@
 
 
 ## 5.4. RegExp类型
-
 ```
     var expression = /pattern/flag
-    
-    # flag 类型如下
-    g: 全局模式, 匹配全部
+
+    // flag 类型如下
+    g: 全局模式, 匹配全部符合的字符串, 而非在发现第一个匹配项后立即停止
+
+    i: 表示不区分大小写模式
+    m: 表示多行模式(multiline), 即使在达到一行文本的末尾, 还会继续查找下一行是否匹配
+
+    /*
+     * 匹配字符串中所有"at"的实例
+     */
+    var pattern1 = /at/g;
+
+    /*
+     * 匹配第一个"bat"或"cat", 不区分大小写
+     */
+    var pattern2 = /[bc]at/i;
+
+    /*
+     * 匹配全部以"at"结尾的三个字符的组合, 不区分大小写
+     */
+    var pattern3 = /.at/gi;
+
+
+    /*
+     * 与pattern3相同, 只是使用了构造函数来创建
+     */
+    var pattern4 = new RegExp(".at", "gi")
 ```
+> 匹配以某字符串结尾的字符串, 可参照以下例子
+```
+    > s = "ccabbsbbbcbabbbwebbabdabbbbqwbebabbabba"
+    'ccabbsbbbcbabbbwebbabdabbbbqwbebabbabba'
+
+    > s.split(/[^\a]+/);
+    [ '', 'a', 'a', 'a', 'a', 'a', 'a', 'a' ]
+    
+    > s.match(/[^\a]+/g);
+    [ 'cc', 'bbsbbbcb', 'bbbwebb', 'bd', 'bbbbqwbeb', 'bb', 'bb' ]
+```
+
+## 5.5: Function 类型
+> 函数实际上是对象, 每个函数都是Function类型的实例, 而且都与其他引用类型一样具有属性和方法.
+
+函数就是对象, 函数名就是指针
+```
+var sum = function(num1, num2){
+    return num1+num2
+};
+
+等价于
+var sum = new Function("num1", "num2", "return num1+num2);
+// 最下面的方法不推荐, 因为会产生两次解析
+```
+* 5.5.3  作为值的函数:
+    * 去掉括号, 例如 add, 表示这个函数对象的引用
+
+    * 保留括号, 例如 add(), 表示对这个函数对象的调用
+
+* 5.5.4 函数的内部属性
+
+    * arguments ,常规用法easy, 以下为重点用法callee, 用于解耦
+    ```
+    function factorial(num){
+        if(num <= 1){
+            return 1;
+        } else{
+            return num * arguments.callee(num-1)
+            // 耦合写法是 num * factorial(num-1), 如果换个函数名, 这种写法就不行了, 所以要用上面的写法, 可以解耦
+        }
+    }
+    ```
+    * ## `this`(重要!): 用法跟python的self差不多
+        * this会动态绑定对象(如果函数中包含this, 而且该函数指针被赋值给了别的对象的函数)
+
+
+*   5.5.5 函数属性和方法
+    
+    * prototype: 保存 `引用类型` 的 `实例方法` 的真正所在, 无法用for-in枚举, 在创建自定义 `引用类型` 时要特别注意prototype
+
+    * `apply`: (重要!) 注意, this的内容是什么
+
+    * call : 和apply一样, 只是第二个参数不能传入数组, 传入确定参数
+
+
+
+# 模块化编程:
+
+
+# 6. 面向对象的程序设计
+
+## 6.1.1 属性类型
+
+> ECMAScript包含两种属性: `数据属性`和`访问器属性`. 为了表示特性是内部值, ES5规范把内部值放在两对方括号里, 如[[Enumerable]].
+
+1. 数据属性, 有4个描述其行为的特性
+    * [[Configurable]]:  是否可以删除属性重新定义, 是否能修改属性的特性
+    
+    * [[Enamerable]]: 是否可枚举
+    
+    * [[Writable]]: 是否能修改属性的值
+
+    * [[Value]]: 包含这个属性的数据值
